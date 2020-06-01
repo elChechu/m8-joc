@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/android/android.iml" filepath="$PROJECT_DIR$/.idea/modules/android/android.iml" group="joc2020/android" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core.iml" group="joc2020/core" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/desktop/desktop.iml" filepath="$PROJECT_DIR$/.idea/modules/desktop/desktop.iml" group="joc2020/desktop" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/joc2020.iml" filepath="$PROJECT_DIR$/.idea/modules/joc2020.iml" group="joc2020" />
+    </modules>
+  </component>
+</project>

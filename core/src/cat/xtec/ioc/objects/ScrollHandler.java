@@ -4,113 +4,98 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.List;
 
-import cat.xtec.ioc.utils.Methods;
 import cat.xtec.ioc.utils.Settings;
+import cat.xtec.ioc.utils.Methods;
 
 public class ScrollHandler extends Group {
 
-    // Fons de pantalla
-    Background bg, bg_back;
+   private List<Asteroid> asteroids;
+   Background bg_front, bg_back;
+   Random r;
 
-    // Asteroides
-    int numAsteroids;
-    private ArrayList<Asteroid> asteroids;
+   public ScrollHandler() {
 
-    // Objecte Random
-    Random r;
+      r = new Random();
 
+      // Backgrounds
+      addActor(bg_front = new Background(
+         0,
+         0,
+         Settings.GAME_WIDTH * 2,
+         Settings.GAME_HEIGHT,
+         Settings.BG_SPEED
+      ));
+      addActor(bg_back = new Background(
+         bg_front.getTailX(),
+         0,
+         Settings.GAME_WIDTH * 2,
+         Settings.GAME_HEIGHT,
+         Settings.BG_SPEED
+      ));
 
-    public ScrollHandler() {
+      // Asteroids
+      asteroids = new ArrayList<Asteroid>();
 
-        // Creem els dos fons
-        bg = new Background(0, 0, Settings.GAME_WIDTH * 2, Settings.GAME_HEIGHT, Settings.BG_SPEED);
-        bg_back = new Background(bg.getTailX(), 0, Settings.GAME_WIDTH * 2, Settings.GAME_HEIGHT, Settings.BG_SPEED);
+      float size = Methods.randomFloat(Settings.MIN_ASTEROID, Settings.MAX_ASTEROID) * 34;
+      Asteroid asteroid;
+      asteroids.add(asteroid = new Asteroid(
+         Settings.GAME_WIDTH,
+         r.nextInt(Settings.GAME_HEIGHT - (int) size),
+         size,
+         size,
+         Settings.asteroidSpeed
+      ));
+      addActor(asteroid);
 
-        // Afegim els fons al grup
-        addActor(bg);
-        addActor(bg_back);
+      for (int i = 1; i < Settings.asteroidCount; i++) {
+         size = Methods.randomFloat(Settings.MIN_ASTEROID, Settings.MAX_ASTEROID) * 34;
+         asteroids.add(
+            asteroid = new Asteroid(
+               asteroids.get(asteroids.size() - 1).getTailX() + Settings.asteroidGap,
+               r.nextInt(Settings.GAME_HEIGHT - (int) size),
+               size,
+               size,
+               Settings.asteroidSpeed
+            )
+         );
+         addActor(asteroid);
+      }
+   }
 
-        // Creem l'objecte random
-        r = new Random();
+   @Override
+   public void act(float delta) {
+      super.act(delta);
 
-        // Comencem amb 3 asteroids
-       numAsteroids = 3;
+      if (bg_front.isLeftOfScreen())
+         bg_front.reset(bg_back.getTailX());
 
-        // Creem l'ArrayList
-        asteroids = new ArrayList<Asteroid>();
+      else if (bg_back.isLeftOfScreen())
+         bg_back.reset(bg_front.getTailX());
 
-        // Definim una mida aleatòria entre el mínim i el màxim
-        float newSize = Methods.randomFloat(Settings.MIN_ASTEROID, Settings.MAX_ASTEROID) * 34;
+      Asteroid asteroid;
+      for (int i = 0; i < asteroids.size(); i++)
+         if ((asteroid = asteroids.get(i)).isLeftOfScreen())
+            asteroid.reset(asteroids.get((i == 0 ? asteroids.size() : i) - 1).getTailX() + Settings.asteroidGap);
+   }
 
-        // Afegim el primer Asteroid a l'Array i al grup
-        Asteroid asteroid = new Asteroid(Settings.GAME_WIDTH, r.nextInt(Settings.GAME_HEIGHT - (int) newSize), newSize, newSize, Settings.ASTEROID_SPEED);
-        asteroids.add(asteroid);
-        addActor(asteroid);
+   public boolean collides(Spacecraft spacecraft) {
 
-        // Des del segon fins l'últim asteroide
-        for (int i = 1; i < numAsteroids; i++) {
-            // Creem la mida al·leatòria
-            newSize = Methods.randomFloat(Settings.MIN_ASTEROID, Settings.MAX_ASTEROID) * 34;
-            // Afegim l'asteroid.
-            asteroid = new Asteroid(asteroids.get(asteroids.size() - 1).getTailX() + Settings.ASTEROID_GAP, r.nextInt(Settings.GAME_HEIGHT - (int) newSize), newSize, newSize, Settings.ASTEROID_SPEED);
-            // Afegim l'asteroide a l'ArrayList
-            asteroids.add(asteroid);
-            // Afegim l'asteroide al grup d'actors
-            addActor(asteroid);
-        }
+      for (Asteroid asteroid : asteroids)
+         if (asteroid.collides(spacecraft))
+            return true;
 
-    }
+      return false;
+   }
 
-    @Override
-    public void act(float delta) {
-        super.act(delta);
-        // Si algun element està fora de la pantalla, fem un reset de l'element.
-        if (bg.isLeftOfScreen()) {
-            bg.reset(bg_back.getTailX());
+   public void reset() {
+      asteroids.get(0).reset(Settings.GAME_WIDTH);
+      for (int i = 1; i < asteroids.size(); i++)
+         asteroids.get(i).reset(asteroids.get(i - 1).getTailX() + Settings.asteroidGap);
+   }
 
-        } else if (bg_back.isLeftOfScreen()) {
-            bg_back.reset(bg.getTailX());
-
-        }
-
-        for (int i = 0; i < asteroids.size(); i++) {
-
-            Asteroid asteroid = asteroids.get(i);
-            if (asteroid.isLeftOfScreen()) {
-                if (i == 0) {
-                    asteroid.reset(asteroids.get(asteroids.size() - 1).getTailX() + Settings.ASTEROID_GAP);
-                } else {
-                    asteroid.reset(asteroids.get(i - 1).getTailX() + Settings.ASTEROID_GAP);
-                }
-            }
-        }
-    }
-
-    public boolean collides(Spacecraft nau) {
-
-        // Comprovem les col·lisions entre cada asteroid i la nau
-        for (Asteroid asteroid : asteroids) {
-            if (asteroid.collides(nau)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void reset() {
-
-        // Posem el primer asteroid fora de la pantalla per la dreta
-        asteroids.get(0).reset(Settings.GAME_WIDTH);
-        // Calculem les noves posicions de la resta d'asteroids.
-        for (int i = 1; i < asteroids.size(); i++) {
-
-            asteroids.get(i).reset(asteroids.get(i - 1).getTailX() + Settings.ASTEROID_GAP);
-
-        }
-    }
-
-    public ArrayList<Asteroid> getAsteroids() {
-        return asteroids;
-    }
+   public List<Asteroid> getAsteroids() {
+      return asteroids;
+   }
 }

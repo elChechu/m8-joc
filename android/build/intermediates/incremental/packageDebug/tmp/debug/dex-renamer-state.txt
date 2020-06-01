@@ -1,4 +1,0 @@
-#Sun May 31 14:06:42 CEST 2020
-base.0=/home/chechu/github/joc/joc2020/android/build/intermediates/dex/debug/mergeDexDebug/classes.dex
-path.0=classes.dex
-renamed.0=classes.dex

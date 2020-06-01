@@ -11,102 +11,96 @@ import cat.xtec.ioc.screens.GameScreen;
 
 public class InputHandler implements InputProcessor {
 
-    // Enter per a la gesitó del moviment d'arrastrar
-    int previousY = 0;
-    // Objectes necessaris
-    private Spacecraft spacecraft;
-    private GameScreen screen;
-    private Vector2 stageCoord;
+   private Vector2 stageCoordinates;
+   private Spacecraft spacecraft;
+   private GameScreen screen;
+   private Stage stage;
+   int previousY = 0;
 
-    private Stage stage;
+   public InputHandler(GameScreen screen) {
+      spacecraft = screen.getSpacecraft();
+      stage = screen.getStage();
+      this.screen = screen;
+   }
 
-    public InputHandler(GameScreen screen) {
+   @Override
+   public boolean keyUp(int keycode) {
+      return false;
+   }
 
-        // Obtenim tots els elements necessaris
-        this.screen = screen;
-        spacecraft = screen.getSpacecraft();
-        stage = screen.getStage();
+   @Override
+   public boolean keyDown(int keycode) {
+      return false;
+   }
 
-    }
+   @Override
+   public boolean keyTyped(char character) {
+      return false;
+   }
 
-    @Override
-    public boolean keyDown(int keycode) {
-        return false;
-    }
+   @Override
+   public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
-    @Override
-    public boolean keyUp(int keycode) {
-        return false;
-    }
+      switch (screen.getCurrentState()) {
 
-    @Override
-    public boolean keyTyped(char character) {
-        return false;
-    }
+         case READY:
+            screen.setCurrentState(GameScreen.GameState.RUNNING);
+            break;
 
-    @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+         case RUNNING:
+            previousY = screenY;
+            stageCoordinates = stage.screenToStageCoordinates(new Vector2(screenX, screenY));
+            Actor actorHit = stage.hit(stageCoordinates.x, stageCoordinates.y, true);
 
-        switch (screen.getCurrentState()) {
-            case READY:
+            if (actorHit != null)
+               Gdx.app.log("HIT", actorHit.getName());
 
-                // Si fem clic comencem el joc
-                screen.setCurrentState(GameScreen.GameState.RUNNING);
-                break;
-            case RUNNING:
-                previousY = screenY;
+            spacecraft.shoot(screen.getScrollHandler());
+            break;
 
-                stageCoord = stage.screenToStageCoordinates(new Vector2(screenX, screenY));
-                Actor actorHit = stage.hit(stageCoord.x, stageCoord.y, true);
-                if (actorHit != null) {
-                    Gdx.app.log("HIT", actorHit.getName());
+         case OVER:
+            screen.reset();
+            break;
+      }
 
-                }
-                break;
-            // Si l'estat és GameOver tornem a iniciar el joc
-            case GAMEOVER:
-                screen.reset();
-                break;
-        }
+      return true;
+   }
 
-        return true;
-    }
+   @Override
+   public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 
-    @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-
-        // Quan deixem anar el dit acabem un moviment
-        // i posem la nau en l'estat normal
-        spacecraft.goStraight();
-        return true;
-    }
+      // Quan deixem anar el dit acabem un moviment
+      // i posem la nau en l'estat normal
+      spacecraft.goStraight();
+      return true;
+   }
 
 
-    @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-        // Posem un umbral per evitar gestionar events quan el dit està quiet
-        if (Math.abs(previousY - screenY) > 2)
+   @Override
+   public boolean touchDragged(int screenX, int screenY, int pointer) {
+      // Posem un umbral per evitar gestionar events quan el dit està quiet
+      if (Math.abs(previousY - screenY) > 2)
 
-            // Si la Y és major que la que tenim
-            // guardada és que va cap avall
-            if (previousY < screenY) {
-                spacecraft.goDown();
-            } else {
-                // En cas contrari cap a dalt
-                spacecraft.goUp();
-            }
-        // Guardem la posició de la Y
-        previousY = screenY;
-        return true;
-    }
+         // Si la Y és major que la que tenim
+         // guardada és que va cap avall
+         if (previousY < screenY) {
+            spacecraft.goDown();
+         } else {
+            // En cas contrari cap a dalt
+            spacecraft.goUp();
+         }
+      // Guardem la posició de la Y
+      previousY = screenY;
+      return true;
+   }
 
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        return false;
-    }
+   @Override
+   public boolean mouseMoved(int screenX, int screenY) {
+      return false;
+   }
 
-    @Override
-    public boolean scrolled(int amount) {
-        return false;
-    }
+   @Override
+   public boolean scrolled(int amount) {
+      return false;
+   }
 }

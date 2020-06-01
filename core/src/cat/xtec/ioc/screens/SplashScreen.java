@@ -13,21 +13,20 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 import cat.xtec.ioc.SpaceRace;
 import cat.xtec.ioc.helpers.AssetManager;
-import cat.xtec.ioc.utils.Methods;
 import cat.xtec.ioc.utils.Settings;
 
 
-public class SplashScreen extends BaseScreen {
+public class SplashScreen implements Screen {
 
     private Stage stage;
-
+    private SpaceRace game;
 
     private Label.LabelStyle textStyle;
     private Label textLbl;
 
-
     public SplashScreen(SpaceRace game) {
-      super(game);
+
+        this.game = game;
 
         // Creem la càmera de les dimensions del joc
         OrthographicCamera camera = new OrthographicCamera(Settings.GAME_WIDTH, Settings.GAME_HEIGHT);
@@ -66,7 +65,6 @@ public class SplashScreen extends BaseScreen {
         stage.addActor(spacecraft);
 
 
-
     }
 
     @Override
@@ -80,11 +78,17 @@ public class SplashScreen extends BaseScreen {
         stage.draw();
         stage.act(delta);
 
-        // Si es fa clic en la pantalla, canviem la pantalla
         if (Gdx.input.isTouched()) {
-            game.setScreen(new GameScreen(stage.getBatch(), stage.getViewport(), game));
+            game.setScreen(new ModeScreen(game));
             dispose();
         }
+
+        /*
+        if (Gdx.input.isTouched()) {
+            game.setScreen(new GameScreen(stage.getBatch(), stage.getViewport()));
+            dispose();
+        }
+        * */
 
     }
 
